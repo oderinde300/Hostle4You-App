@@ -1,0 +1,106 @@
+<% layout('layouts/boilerplate') %>
+    <link rel="stylesheet" href="/stylesheets/stars.css">
+    <link rel="stylesheet" href="/stylesheets/app.css">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <img class="show-img" src="<%= lodge.image %> " alt="<%= lodge.name %> ">
+            <div class="card">
+
+                <div class="card-body">
+                    <h1 class="card-title text-capitalize">
+                        <%= lodge.name %>
+                    </h1>
+                    <p class="card-text">Description: <%= lodge.description %>
+                    </p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item text-muted  text-capitalize">
+                            <%= lodge.schoolGate %>
+                        </li>
+                        <li class="list-group-item text-capitalize">
+                            Submitted By <%= lodge.author.username %> - A <%= lodge.author.userStatus %>
+                        </li>
+                        <li class="list-group-item text-capitalize">
+                            Phone Number - <%= lodge.author.phoneNumber %>
+                        </li>
+                        <li class="list-group-item text-capitalize">Closest Lodge/Location: <%= lodge.location %>
+                        </li>
+                        <li class="list-group-item">₦<%= lodge.price %>/year</li>
+                        <li class="list-group-item">Type of Lodge: <span class="text-capitalize">
+                                <%= lodge.typeOfLodge %>
+                            </span>
+                        </li>
+                        <li class="list-group-item">Rooms Available: <%= lodge.roomsAvailable %>
+                        </li>
+                    </ul>
+                    <% if(currentUser && lodge.author.equals(currentUser._id)) { %>
+                        <div class="card-body">
+                            <a class="card-link btn btn-info" href="/lodges/<%= lodge._id %>/edit ">Edit</a>
+                            <form class="d-inline" action="/lodges/<%= lodge._id %>?_method=DELETE" method="POST">
+                                <button class="btn btn-danger ">Delete</button>
+                            </form>
+                        </div>
+                        <% } %>
+
+                </div>
+                <div class="card-footer text-muted text-ita">
+                    Last Updated- <%= lodge.date %>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <% if(currentUser) { %>
+                <h1>Review</h1>
+                <form action="/lodges/<%= lodge.id  %>/reviews" method="POST" class="mb-3 validated-form" novalidate>
+                    <fieldset class="starability-basic">
+                        <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked
+                            aria-label="No rating." />
+                        <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                        <label for="first-rate1" title="Terrible">1 star</label>
+                        <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                        <label for="first-rate2" title="Not good">2 stars</label>
+                        <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                        <label for="first-rate3" title="Average">3 stars</label>
+                        <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                        <label for="first-rate4" title="Very good">4 stars</label>
+                        <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                        <label for="first-rate5" title="Amazing">5 stars</label>
+                    </fieldset>
+                    <div class="mb-3">
+                        <label class="form-label" for="body">Review Text</label>
+                        <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3"
+                            required></textarea>
+                        <div class="valid-feedback">
+                            Looks good!
+                        </div>
+                    </div>
+                    <button class="btn btn-success">Add Review</button>
+                </form>
+                <% } %>
+                    <div class="mb-3">
+                        <% for (let review of lodge.reviews ) { %>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <p class="starability-result" data-rating="<%=review.rating%>">
+                                        Rated: <%= review.rating %> stars
+                                    </p>
+                                    <h6 class="card-subtitle">
+                                        By <%= review.author.username %>
+                                    </h6>
+                                    <p class="card-text">Review: <%= review.body %>
+                                    </p>
+                                    <% if(currentUser && review.author.equals(currentUser._id)) { %>
+                                        <form action="/lodges/<%= lodge._id %>/reviews/<%= review._id %>?_method=DELETE"
+                                            method="POST">
+                                            <button class="btn btn-sm btn-danger">Delete</button>
+                                        </form>
+                                        <% } %>
+                                </div>
+                            </div>
+                            <% } %>
+                    </div>
+        </div>
+    </div>
+
+    </body>
+
+    </html>
