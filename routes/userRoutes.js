@@ -1,53 +1,20 @@
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
-const User = require('../models/user');
 const catchAsync = require('../utilities/catchAsync');
+const users = require('../controllers/users');
 
-const userStatus = ['landlord/landlady', 'student'];
 
-router.get('/register', (req, res) => {
-    res.render('users/register', { userStatus });
-});
+router.route('/register')
+    .get(users.renderRegisterForm)
+    .post(catchAsync(users.register));
 
-router.post('/register', catchAsync(async (req, res, next) => {
-    try {
-        const { email, username, password, tel, userStatus } = req.body;
-        const user = new User({ email, username, userStatus, phoneNumber: tel });
-        const registeredUser = await User.register(user, password);
-        req.login(registeredUser, err => {
-            if (err) {
-                return next(err);
-            }
-            req.flash('success', 'Welcome to Hostel4You');
-            res.redirect('/lodges');
-        });
-    } catch (e) {
-        req.flash('error', e.message);
-        res.redirect('/register');
-    }
-}));
+router.route('/login')
+    .get(users.renderLoginForm)
+    .post(passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }),
+        catchAsync(users.login));
 
-router.get('/login', (req, res) => {
-    res.render('users/login');
-});
-
-router.post('/login', passport.authenticate('local', { failureFlash: true, failureRedirect: '/login' }),
-    catchAsync(async (req, res) => {
-        req.flash('success', 'Welcome Back!');
-        const redirectUrl = req.session.returnTo || '/lodges';
-        delete req.session.returnTo;
-        res.redirect(redirectUrl);
-    }));
-
-router.get('/logout', (req, res) => {
-    req.logout(err => {
-        if (err) {
-            return next(err);
-        }
-        req.flash('success', 'Goodbye!');
-        res.redirect('/lodges');
-    });
-});
+router.route('/logout')
+    .get(users.logout);
 
 module.exports = router;

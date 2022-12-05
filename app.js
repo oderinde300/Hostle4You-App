@@ -1,3 +1,9 @@
+if (process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+};
+
+
+
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -13,8 +19,11 @@ const userRoutes = require('./routes/userRoutes');
 const LocalStrategy = require('passport-local');
 const passport = require('passport');
 const User = require('./models/user');
+const mongoSanitize = require('express-mongo-sanitize');
+const MongoStore = require('connect-mongo');
+const dburl = process.env.DB_URL || 'mongodb://localhost:27017/hostel4you';
 
-mongoose.connect('mongodb://localhost:27017/hostel4you');
+mongoose.connect(dburl);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
@@ -31,13 +40,25 @@ app.engine('ejs', ejsMate);
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(mongoSanitize());
+
+const store = MongoStore.create({ mongoUrl: dburl });
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+});
+
+const secret = process.env.SECRET || 'hellotherefool!@_=1234567))';
 
 const sessionConfig = {
-    secret: 'hellotherefool!@_=1234567))',
+    store,
+    name:'Hostel4YouName',
+    secret: secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
+
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
@@ -82,4 +103,5 @@ app.use((err, req, res, next) => {
 
 app.listen(3000, () => {
     console.log('Serving on port 3000');
+    console.log('go');
 });
