@@ -23,7 +23,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const MongoStore = require('connect-mongo');
 const dburl = process.env.DB_URL || 'mongodb://localhost:27017/hostel4you';
 
-mongoose.connect('mongodb://localhost:27017/hostel4you');
+mongoose.connect(dburl);
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
